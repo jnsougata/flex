@@ -50,12 +50,12 @@ class DOMEvent:
         self._form_expr = {}
 
     @classmethod
-    def polling(cls, ms: int) -> "DOMEvent":
-        return cls(f"every {ms}ms")
+    def polling(cls, interval: int) -> "DOMEvent":
+        return cls(f"every {interval}ms")
 
     @classmethod
-    def load_polling(cls, delay_ms: int, swap: Swapping) -> "DOMEvent":
-        ev = cls(f"load delay:{delay_ms}ms")
+    def load_polling(cls, interval: int, swap: Swapping) -> "DOMEvent":
+        ev = cls(f"load delay:{interval}ms")
         ev.swap(swap)
         return ev
 
@@ -87,6 +87,10 @@ class DOMEvent:
 
     def modifiers(self, *evm: EventModifier) -> "DOMEvent":
         self.name = f"{self.name} {' '.join([m.name for m in evm])}"
+        return self
+
+    def merge(self, event: "DOMEvent") -> "DOMEvent":
+        self.name += f", {event.name}"
         return self
 
     def __str__(self) -> str:

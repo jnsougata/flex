@@ -49,6 +49,7 @@ class HTMLElement:
 
     # noinspection PyProtectedMember
     def listen(self, dom: "Document", event: DOMEvent, **hx_attrs: str):
+        self.attributes["hx-trigger"] = event.name
         if event._method:
             hx_attrs[f"{event._method.lower()}"] = event._path
         if event._target:
@@ -58,9 +59,7 @@ class HTMLElement:
         if event._form_expr:
             hx_attrs["vals"] = ("js:{ "
                                 + ", ".join([f"{key}: {value}" for key, value in event._form_expr.items()]) + " }")
-        hx_attrs["trigger"] = event.name
-        for key, value in hx_attrs.items():
-            self.set(**{f"hx-{key}": str(value)})
+        self.attributes.update(**{f"hx-{key}": value for key, value in hx_attrs.items()})
 
         # noinspection PyProtectedMember
         def wrapper(handler: Handler):

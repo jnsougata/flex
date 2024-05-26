@@ -23,5 +23,11 @@ class CSS:
             self.__dict__["_attrs"][_cssify(key)] = value
         return self
 
+    def overwrite(self, **attrs) -> "CSS":
+        css = CSS(**self.__dict__["_attrs"])
+        for key, value in attrs.items():
+            css.__dict__["_attrs"][_cssify(key)] = value
+        return css
+
     def __str__(self) -> str:
         return "; ".join([f"{key}: {value}" for key, value in self.__dict__["_attrs"].items()])
