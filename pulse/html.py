@@ -3,7 +3,7 @@ from typing import List, Dict, Any, Union, Callable, Coroutine, TYPE_CHECKING
 from starlette.requests import Request
 from starlette.responses import HTMLResponse
 
-from .htmx import Htmx
+from .event import DOMEvent
 from .style import CSS
 
 if TYPE_CHECKING:
@@ -47,29 +47,27 @@ class HTMLElement:
         else:
             return f'<{self.tag} {attrs}>{children}</{self.tag}>'
 
-    def trigger(self, dom: "Document", htmx: Htmx):
+    # noinspection PyProtectedMember
+    def listen(self, doc: "Document", *, event: DOMEvent,  **hx_attrs: str):
+        if event._method:
+            hx_attrs[f"{event._method.lower()}"] = event._path
+        if event._target:
+            hx_attrs["target"] = event._target
+        if event._swap:
+            hx_attrs["swap"] = event._swap
+        if event._form_expr:
+            hx_attrs["vals"] = "js:{ " + ", ".join([f"{key}: {value}" for key, value in event._form_expr.items()]) + " }"
+        hx_attrs["trigger"] = event.name
+        for key, value in hx_attrs.items():
+            self.set_attribute(f"hx-{key}", str(value))
 
-        for key, value in htmx.attributes.items():
-            self.set_attribute(f'hx-{key}', value)
-
-        if htmx.target:
-            self.set_attribute('hx-target', htmx.target)
-
-        if htmx.filters:
-            tf = ' '.join(htmx.filters)
-        else:
-            tf = ''
-        self.set_attribute('hx-trigger', f'{htmx.event} {tf}')
-
+        # noinspection PyProtectedMember
         def wrapper(handler: Handler):
 
             async def callback(request: Request):
                 elem = await handler(request)
                 return HTMLResponse(str(elem))
-
-            if htmx.method:
-                self.set_attribute(f'hx-{htmx.method.lower()}', htmx.path)
-                dom.add_route(htmx.path, callback, methods=[htmx.method])
+            doc.add_route(hx_attrs[event._method.lower()], callback, methods=[event._method.upper()])
             return handler
 
         return wrapper
