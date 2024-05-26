@@ -11,8 +11,10 @@ class Document(Starlette):
         super().__init__()
         self.__html = HTMLElement("html")
         self.__head = HTMLElement("head")
-        self.__head.append(
-            HTMLElement("script").set_attribute("src", "https://unpkg.com/htmx.org@1.9.12"))
+        self.__head.append(HTMLElement("meta", self_enclosing=True).set(charset="utf-8"))
+        self.__head.append(HTMLElement("meta", self_enclosing=True)
+                           .set(name="viewport", content="width=device-width, initial-scale=1.0"))
+        self.__head.append(HTMLElement("script").set(src="https://unpkg.com/htmx.org@1.9.12"))
         self.__body = HTMLElement("body")
         self.html.append(self.head, self.body)
         self.add_route(path, lambda _: HTMLResponse(str(self)), methods=methods)

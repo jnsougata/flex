@@ -7,26 +7,26 @@ from .event import DOMEvent
 from .style import CSS
 
 if TYPE_CHECKING:
-    from .doc import Document
+    from .dom import Document
 
 
 Handler = Callable[[Request], Coroutine[Any, Any, "HTMLElement"]]
 
 
 class HTMLElement:
-    def __init__(self, tag: str, self_closing: bool = False):
+    def __init__(self, tag: str, self_enclosing: bool = False):
         self.tag = tag
         self.children: List[Union["HTMLElement", str]] = []
         self.attributes: Dict[str, Any] = {}
-        self.self_closing: bool = self_closing
+        self.self_closing: bool = self_enclosing
         self.__style: CSS = CSS()
 
     def append(self, *children: Union["HTMLElement", str]) -> "HTMLElement":
         self.children.extend(children)
         return self
 
-    def set_attribute(self, key: str, value: str) -> "HTMLElement":
-        self.attributes[key] = value
+    def set(self, **attrs: str) -> "HTMLElement":
+        self.attributes.update(attrs)
         return self
 
     @property
@@ -48,7 +48,7 @@ class HTMLElement:
             return f'<{self.tag} {attrs}>{children}</{self.tag}>'
 
     # noinspection PyProtectedMember
-    def listen(self, doc: "Document", *, event: DOMEvent,  **hx_attrs: str):
+    def listen(self, dom: "Document", event: DOMEvent, **hx_attrs: str):
         if event._method:
             hx_attrs[f"{event._method.lower()}"] = event._path
         if event._target:
@@ -56,10 +56,11 @@ class HTMLElement:
         if event._swap:
             hx_attrs["swap"] = event._swap
         if event._form_expr:
-            hx_attrs["vals"] = "js:{ " + ", ".join([f"{key}: {value}" for key, value in event._form_expr.items()]) + " }"
+            hx_attrs["vals"] = ("js:{ "
+                                + ", ".join([f"{key}: {value}" for key, value in event._form_expr.items()]) + " }")
         hx_attrs["trigger"] = event.name
         for key, value in hx_attrs.items():
-            self.set_attribute(f"hx-{key}", str(value))
+            self.set(**{f"hx-{key}": str(value)})
 
         # noinspection PyProtectedMember
         def wrapper(handler: Handler):
@@ -67,7 +68,7 @@ class HTMLElement:
             async def callback(request: Request):
                 elem = await handler(request)
                 return HTMLResponse(str(elem))
-            doc.add_route(hx_attrs[event._method.lower()], callback, methods=[event._method.upper()])
+            dom.add_route(hx_attrs[event._method.lower()], callback, methods=[event._method.upper()])
             return handler
 
         return wrapper

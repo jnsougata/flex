@@ -16,7 +16,7 @@ __author__ = "Sougata Jana"
 __version__ = "0.0.1a"
 
 
-from .doc import Document
+from .dom import Document
 from pulse.event import DOMEvent, EventModifier, Swapping
 from .html import HTMLElement
 from .style import CSS

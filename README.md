@@ -26,97 +26,90 @@ pip install git+https://github.com/jnsougata/pulse.git
 - [ ] Documentation
 
 ## Quick Start
+
 ```python
 import uvicorn
 
 import pulse
 
-app = pulse.Document()
-app.head.append(pulse.HTMLElement("title").append("Pulse!"))
-app.head.append(pulse.HTMLElement("meta", self_closing=True).set_attribute("charset", "utf-8"))
-app.head.append(pulse.HTMLElement("meta", self_closing=True)
-                .set_attribute("name", "viewport")
-                .set_attribute("content", "width=device-width, initial-scale=1.0"))
-elem = pulse.HTMLElement("div")
-elem.set_attribute("id", "container")
-elem.style.set(**{
-    "background-color": "#333",
-    "color": "white",
-    "padding": "10px",
-    "margin": "10px",
-    "border-radius": "5px",
-    "text-align": "center",
-    "height": "100px",
-})
+dom = pulse.Document()
 
-button_css = pulse.CSS(**{
-    "margin": "10px",
-    "padding": "10px",
-    "border-radius": "5px",
-    "background-color": "teal",
-    "color": "white",
-    "border": "none",
-    "cursor": "pointer",
-})
+dom.head.append(pulse.HTMLElement("title").append("Pulse!"))
 
+container = pulse.HTMLElement("div")
+container.set(id="container")
+container.style.set(
+    background_color="teal",
+    color="white",
+    padding="10px",
+    margin="10px",
+    border_radius="5px",
+    text_align="center",
+)
+container.append(pulse.HTMLElement("h1").append("Greetings"))
+dom.body.append(container)
 
-elem.append(pulse.HTMLElement("h1").append("Greetings"))
-app.body.append(elem)
+button_style = pulse.CSS(
+    margin="10px",
+    padding="10px",
+    border_radius="5px",
+    background_color="teal",
+    color="white",
+    border="none",
+    cursor="pointer"
+)
 
 
-incr = pulse.HTMLElement("button").append("+1")
-incr.style = button_css
+counter = pulse.HTMLElement("button").append("+1")
+counter.style = button_style
 
-app.counter = 0
+dom.counter = 0
 
 
-@incr.listen(
-    app,
-    event=pulse.DOMEvent("click")
-    .modifiers(pulse.EventModifier.delay(200))
+@counter.listen(
+    dom,
+    pulse.DOMEvent("click")
     .method("GET")
     .path("/clicked-p")
     .target("#container h1")
 )
 async def clicked(_):
-    app.counter += 1
-    return str(app.counter)
+    dom.counter += 1
+    return str(dom.counter)
 
 
-inp = pulse.HTMLElement("input", self_closing=True)
-inp.set_attribute("type", "text")
-inp.set_attribute("placeholder", "Enter your name")
-inp.style = pulse.CSS(**{
-    "margin": "10px",
-    "padding": "10px",
-    "border-radius": "5px",
-    "border": "1px solid teal",
-    "width": "200px",
-    "text-align": "center",
-    "font-size": "14px",
-    "font-family": "Arial",
-    "outline": "none",
-})
+name_input = pulse.HTMLElement("input", self_enclosing=True)
+name_input.set(type="text", placeholder="Enter your name...")
+name_input.style = pulse.CSS(
+    margin="10px",
+    padding="10px",
+    border_radius="5px",
+    border="1px dashed teal",
+    width="200px",
+    text_align="center",
+    font_size="14px",
+    outline="none",
+    cursor="pointer"
+)
 
 
-@inp.listen(
-    app,
-    event=pulse.DOMEvent("input")
-    .modifiers(pulse.EventModifier.delay(0))
+@name_input.listen(
+    dom,
+    pulse.DOMEvent("input")
     .path("/echo")
     .method("POST")
     .target("#container h1")
-    .form(value='event.target.value')
+    .form(name='event.target.value')
 )
-async def name(request: pulse.Request):
-    data = await request.form()
-    return f"Hello, {data['value']}!"
+async def echo(request: pulse.Request):
+    name = (await request.form()).get("name")
+    return f"Hello, {name}!"
 
 
-app.body.append(incr)
-app.body.append(inp)
+dom.body.append(counter)
+dom.body.append(name_input)
 
 
 if __name__ == "__main__":
-    uvicorn.run(app)
+    uvicorn.run(dom)
 ```
