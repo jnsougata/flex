@@ -56,9 +56,9 @@ class App(Starlette):
                 self.body.append(str(child))
         return self.body
 
-    def event(
+    def trigger(
         self,
-        name: str,
+        event: str,
         method: Optional[str] = "GET",
         target: Optional[HTMLElement] = None,
         form: Optional[Dict[str, str]] = None,
@@ -66,13 +66,12 @@ class App(Starlette):
     ) -> Callable[[HTMLElement], HTMLElement]:
         def decorator(child: HTMLElement) -> HTMLElement:
             self.body.append(child)
-            ev = Event(name).path(f"/events/{name}/{child.id}").method(method)
+            ev = Event(event).path(f"/events/{event.split(" ")[0]}/{child.id}").method(method)
             if target:
                 ev.target(f"#{target.id}")
             if form:
                 ev.form(**form)
             child.listener(self, ev, **hxattrs)
-            print(f"Event {name} registered for {child.tag} with id {child.id} and method {method} {target.id}")
             return child
         return decorator
 

@@ -21,14 +21,16 @@ def compose(
         return child
     return decorator
 
+
+# noinspection PyShadowingBuiltins
 def input(
     *,
     placeholder: str = "",
-    input_type: str = "text",
+    type: str = "text",
     **styles: Any,
 ) -> HTMLElement:
     el = HTMLElement("input", self_enclosing=True)
-    el.set(type=input_type)
+    el.set(type=type)
     el.set(placeholder=placeholder)
     el.style = CSS(**styles)
     return el
