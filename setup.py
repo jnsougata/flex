@@ -37,10 +37,10 @@ if version.endswith(("a", "b", "rc")):
         pass
 
 setup(
-    name="pulse",
+    name="flex",
     version=version,
-    description="An ASGI web framework for building simple, fast and scalable web applications.",
-    url="https://github.com/jnsougata/pulse",
+    description="A fast, minimal ASGI framework for building htmx-powered web apps.",
+    url="https://github.com/jnsougata/flex",
     author="Sougata Jana",
     author_email="jnsougata@gmail.com",
     license="MIT",
@@ -49,7 +49,7 @@ setup(
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    packages=["pulse"],
+    packages=["flex"],
     python_requires=">=3.6",
     install_requires=requirements,
 )
