@@ -67,3 +67,4 @@ if __name__ == "__main__":
 
     uvicorn.run(app)
 ```
+![image](https://github.com/user-attachments/assets/094ff17c-79f7-47fb-bab2-ad6c84a9d3c6)
