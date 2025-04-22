@@ -1,6 +1,6 @@
 # Pulse
 
-An ASGI web framework for building simple, fast and scalable web applications.
+A fast, minimal ASGI framework for building htmx-powered web apps.
 
 
 ## Installation
@@ -12,102 +12,59 @@ pip install git+https://github.com/jnsougata/pulse.git
 - [x] Auto Routing
 - [x] DOM Templating
 - [x] HTMX Triggers
-- [ ] Middleware
-- [ ] Static Files
-- [ ] Websockets
-- [ ] Sessions
-- [ ] Cookies
-- [ ] Database
-- [ ] Authentication
-- [ ] Authorization
-- [ ] Rate Limiting
-- [ ] Caching
 - [ ] Testing
 - [ ] Documentation
 
 ## Quick Start
 
 ```python
-import uvicorn
-
 import pulse
+from pulse import ui
 
-dom = pulse.App()
 
-dom.head.append(pulse.HTMLElement("title").append("Pulse!"))
+app = pulse.App()
+app.stylesheet("/public/style.css")
+app.htmx("https://unpkg.com/htmx.org@2.0.4")
+app.static("public", "/public")
+app.counter = 0
 
-container = pulse.HTMLElement("div")
-container.set(id="container")
-container.stylesheet.set(
-    background_color="teal",
-    color="white",
-    padding="10px",
-    margin="10px",
-    border_radius="5px",
-    text_align="center",
-)
-container.append(pulse.HTMLElement("h1").append("Greetings"))
-dom.body.append(container)
 
-button_style = pulse.CSS(
-    margin="10px",
-    padding="10px",
-    border_radius="5px",
-    background_color="teal",
-    color="white",
-    border="none",
-    cursor="pointer"
+view = ui.div(
+    "Hello, World!",
+    ui.p(
+        "Click the button to increment the counter.",
+        font_size="15px",
+        margin="10px",
+        font_weight="400"
+    ),
+    css="view"
 )
 
-counter = pulse.HTMLElement("button").append("+1")
-counter.stylesheet = button_style
+@app.trigger("click", target=view)
+@ui.compose(ui.button("+1", css="increment"))
+async def increment(_):
+    app.counter += 1
+    return str(app.counter)
 
-dom.counter = 0
-
-
-@counter.listener(
-    dom,
-    pulse.Event("click")
-    .method("GET")
-    .path("/clicked-p")
-    .target("#container h1")
-)
-async def clicked(_):
-    dom.counter += 1
-    return str(dom.counter)
-
-
-name_input = pulse.HTMLElement("input", self_enclosing=True)
-name_input.set(type="text", placeholder="Enter your name...")
-name_input.stylesheet = pulse.CSS(
-    margin="10px",
-    padding="10px",
-    border_radius="5px",
-    border="1px dashed teal",
-    width="200px",
-    text_align="center",
-    font_size="14px",
-    outline="none",
-    cursor="pointer"
+app.write(
+    ui.section(
+        ui.section(
+            ui.ul(
+                ui.li(ui.a("Home", href="/")),
+                ui.li(ui.a("About", href="/about")),
+                ui.li(ui.a("Contact", href="/contact")),
+            ),
+            css="navbar"
+        ),
+        ui.main(view, increment),
+        css="app"
+    )
 )
 
-
-@name_input.listener(
-    dom,
-    pulse.Event("input")
-    .path("/echo")
-    .method("POST")
-    .target("#container h1")
-    .form(name='event.target.value')
-)
-async def echo(request: pulse.Request):
-    name = (await request.form()).get("name")
-    return f"Hello, {name}!"
-
-
-dom.body.append(counter)
-dom.body.append(name_input)
 
 if __name__ == "__main__":
-    uvicorn.run(dom)
+    import uvicorn
+
+    uvicorn.run(app)
+
 ```

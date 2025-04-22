@@ -1,6 +1,5 @@
 import secrets
-from typing import (TYPE_CHECKING, Any, Callable, Coroutine, Dict, List,
-                    Optional, Union)
+from typing import TYPE_CHECKING, Any, Callable, Coroutine, Dict, List, Optional, Union
 
 from starlette.requests import Request
 from starlette.responses import HTMLResponse

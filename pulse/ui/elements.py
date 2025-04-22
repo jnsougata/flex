@@ -24,6 +24,17 @@ def compose(
     return decorator
 
 
+def main(
+    *children: Union[HTMLElement, str], css: Optional[str] = None, **styles
+) -> HTMLElement:
+    el = HTMLElement("main")
+    el.style = CSS(**styles)
+    if css:
+        el.set(**{"class": css})
+    el.children = list(children)
+    return el
+
+
 # noinspection PyShadowingBuiltins
 def input(
     *,
