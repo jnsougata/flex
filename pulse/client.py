@@ -4,6 +4,7 @@ from starlette.applications import Starlette
 from starlette.responses import HTMLResponse
 
 from pulse.ui import HTMLElement
+from .style import CSS
 
 from .events import Event
 
@@ -26,6 +27,12 @@ class App(Starlette):
         self.body = HTMLElement("body", auto_id=False)
         self.add_route(path, lambda _: HTMLResponse(str(self)), methods=methods)
 
+    def style(self, **styles: str):
+        """
+        Add CSS styles to the document.
+        """
+        self.body.style = CSS(**styles)
+
     def htmx(self, src: str = "https://unpkg.com/htmx.org@2.0.4"):
         self.head.append(HTMLElement("script", auto_id=False).set(src=src))
 
@@ -41,7 +48,7 @@ class App(Starlette):
         self.head.append(script)
         return script
 
-    def style(self, href: str, **attrs) -> HTMLElement:
+    def stylesheet(self, href: str, **attrs) -> HTMLElement:
         style = HTMLElement("link").set(rel="stylesheet", href=href)
         style.set(**attrs)
         self.head.append(style)
@@ -68,7 +75,7 @@ class App(Starlette):
     ) -> Callable[[HTMLElement], HTMLElement]:
         def decorator(child: HTMLElement) -> HTMLElement:
             self.body.append(child)
-            ev = Event(event).path(f"/events/{child.id}").method(method)
+            ev = Event(event).path(f"/ui/events/{child.id}").method(method)
             if target:
                 ev.target(f"#{target.id}")
             if form:

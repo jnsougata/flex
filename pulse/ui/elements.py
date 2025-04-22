@@ -61,3 +61,83 @@ def div(
     el.style = CSS(**styles)
     el.children = list(children)
     return el
+
+def section(
+    *children: Union[HTMLElement, str],
+    **styles
+) -> HTMLElement:
+    el = HTMLElement("section")
+    el.style = CSS(**styles)
+    el.children = list(children)
+    return el
+
+def span(
+    *children: Union[HTMLElement, str],
+    **styles
+) -> HTMLElement:
+    el = HTMLElement("span")
+    el.style = CSS(**styles)
+    el.children = list(children)
+    return el
+
+def h1(
+    *children: Union[HTMLElement, str],
+    **styles
+) -> HTMLElement:
+    el = HTMLElement("h1")
+    el.style = CSS(**styles)
+    el.children = list(children)
+    return el
+
+def h2(
+    *children: Union[HTMLElement, str],
+    **styles
+) -> HTMLElement:
+    el = HTMLElement("h2")
+    el.style = CSS(**styles)
+    el.children = list(children)
+    return el
+
+def h3(
+    *children: Union[HTMLElement, str],
+    **styles
+) -> HTMLElement:
+    el = HTMLElement("h3")
+    el.style = CSS(**styles)
+    el.children = list(children)
+    return el
+
+def h4(
+    *children: Union[HTMLElement, str],
+    **styles
+) -> HTMLElement:
+    el = HTMLElement("h4")
+    el.style = CSS(**styles)
+    el.children = list(children)
+    return el
+
+def a(
+    *children: Union[HTMLElement, str],
+    href: str = "#",
+    **styles
+) -> HTMLElement:
+    el = HTMLElement("a")
+    el.set(href=href)
+    el.style = CSS(**styles)
+    el.children = list(children)
+    return el
+
+def img(src: str, **styles) -> HTMLElement:
+    el = HTMLElement("img", self_enclosing=True)
+    el.set(src=src)
+    el.style = CSS(**styles)
+    return el
+
+def form(
+    *children: Union[HTMLElement, str],
+    **styles
+) -> HTMLElement:
+    el = HTMLElement("form")
+    el.style = CSS(**styles)
+    el.children = list(children)
+    return el

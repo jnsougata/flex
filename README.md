@@ -38,7 +38,7 @@ dom.head.append(pulse.HTMLElement("title").append("Pulse!"))
 
 container = pulse.HTMLElement("div")
 container.set(id="container")
-container.style.set(
+container.stylesheet.set(
     background_color="teal",
     color="white",
     padding="10px",
@@ -60,7 +60,7 @@ button_style = pulse.CSS(
 )
 
 counter = pulse.HTMLElement("button").append("+1")
-counter.style = button_style
+counter.stylesheet = button_style
 
 dom.counter = 0
 
@@ -79,7 +79,7 @@ async def clicked(_):
 
 name_input = pulse.HTMLElement("input", self_enclosing=True)
 name_input.set(type="text", placeholder="Enter your name...")
-name_input.style = pulse.CSS(
+name_input.stylesheet = pulse.CSS(
     margin="10px",
     padding="10px",
     border_radius="5px",
