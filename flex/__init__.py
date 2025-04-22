@@ -16,8 +16,7 @@ __author__ = "Sougata Jana"
 __version__ = "0.0.1a"
 
 
-from flex.events import Event, EventModifier, Swapping
-
 from . import ui
+from . import htmx
 from .client import App
 from .style import CSS

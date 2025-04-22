@@ -19,7 +19,7 @@ pip install git+https://github.com/jnsougata/flex.git
 
 ```python
 import flex
-from flex import ui
+from flex import ui, htmx
 
 app = flex.App()
 app.stylesheet("/public/style.css")
@@ -38,15 +38,15 @@ view = ui.div(
     css="view"
 )
 
-
-@app.trigger("click", target=view)
+@app.register
+@htmx.click(target=view)
 @ui.compose(ui.button("+1", css="increment"))
 async def increment(_):
     app.counter += 1
     return str(app.counter)
 
 
-app.write(
+app.render(
     ui.section(
         ui.section(
             ui.ul(

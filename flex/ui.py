@@ -1,9 +1,83 @@
-from logging import Handler
-from typing import Any, Optional, Union
+import secrets
+from typing import Any, Callable, Coroutine, Dict, List, Optional, Union
 
-from flex.style import CSS
+from starlette.requests import Request
+from starlette.responses import HTMLResponse
 
-from .html import Handler, HTMLElement
+from .htmx import Event
+from .style import CSS
+
+Handler = Callable[[Request, ...], Coroutine[Any, Any, "HTMLElement"]]
+
+
+class HTMLElement:
+    def __init__(self, tag: str, self_enclosing: bool = False, auto_id: bool = True):
+        self.tag = tag
+        self.attributes: Dict[str, Any] = {}
+        if auto_id:
+            self.id = f"{tag}-{secrets.token_hex(8)}"
+            self.attributes["id"] = self.id
+        else:
+            self.id = None
+        self.children: List[Union["HTMLElement", str]] = []
+        self.self_closing: bool = self_enclosing
+        self.style: CSS = CSS()
+        self.handler: Optional[Handler] = None
+        self.event: Optional[Event] = None
+
+    def load_event(self, event: Event, **hxattrs: str):
+        self.event = event
+        self.attributes["hx-trigger"] = event.name
+        if event.hx_method:
+            hxattrs[event.hx_method.lower()] = event.hx_path
+        if event.hx_target:
+            hxattrs["target"] = event.hx_target
+        if event.hx_swap:
+            hxattrs["swap"] = event.hx_swap
+        if event.hx_form:
+            vals = ", ".join(
+                [f"{key}: {value}" for key, value in event.hx_form.items()]
+            )
+            hxattrs["vals"] = f"js:{{{vals}}}"
+        self.attributes.update(**{f"hx-{key}": value for key, value in hxattrs.items()})
+
+    def route(self):
+        """
+        Create a route for the element.
+        """
+        if not self.handler:
+            raise ValueError("Handler is not set")
+        if not self.event:
+            raise ValueError("Event is not set")
+
+        async def callback(request: Request, *args, **kwargs):
+            elem = await self.handler(request, *args, **kwargs)
+            return HTMLResponse(str(elem))
+
+        return self.event.hx_path, callback, [self.event.hx_method]
+
+    def append(self, *children: Union["HTMLElement", str]) -> "HTMLElement":
+        self.children.extend(children)
+        return self
+
+    def set(self, **attrs: str) -> "HTMLElement":
+        self.attributes.update(attrs)
+        return self
+
+    def __str__(self) -> str:
+        attrs = " ".join([f'{key}="{value}"' for key, value in self.attributes.items()])
+        if str(self.style):
+            attrs += f' style="{self.style}"'
+        children = "".join(
+            [
+                str(child) if isinstance(child, HTMLElement) else child
+                for child in self.children
+            ]
+        )
+        if self.self_closing:
+            return f"<{self.tag} {attrs} />"
+        else:
+            return f"<{self.tag} {attrs}>{children}</{self.tag}>"
 
 
 def compose(

@@ -4,9 +4,9 @@ from starlette.applications import Starlette
 from starlette.responses import HTMLResponse
 from starlette.staticfiles import StaticFiles
 
-from flex.ui import HTMLElement
+from .ui import HTMLElement
 
-from .events import Event
+from .htmx import Event, Swapping
 from .style import CSS
 
 
@@ -66,7 +66,15 @@ class App(Starlette):
         self.head.append(style)
         return style
 
-    def write(self, *children: Union[HTMLElement, str]) -> HTMLElement:
+    def register(self, elem: HTMLElement):
+        """
+        Load an HTML element into the body of the document.
+        """
+        path, callback, methods = elem.route()
+        self.add_route(path, callback, methods=methods)
+        return elem
+
+    def render(self, *children: Union[HTMLElement, str]) -> HTMLElement:
         """
         Write HTML elements to the body of the document.
         """
@@ -76,25 +84,6 @@ class App(Starlette):
             else:
                 self.body.append(str(child))
         return self.body
-
-    def trigger(
-        self,
-        event: str,
-        method: Optional[str] = "GET",
-        target: Optional[HTMLElement] = None,
-        form: Optional[Dict[str, str]] = None,
-        **hxattrs: str,
-    ) -> Callable[[HTMLElement], HTMLElement]:
-        def decorator(child: HTMLElement) -> HTMLElement:
-            ev = Event(event).path(f"/ui/events/{child.id}").method(method)
-            if target:
-                ev.target(f"#{target.id}")
-            if form:
-                ev.form(**form)
-            child.listener(self, ev, **hxattrs)
-            return child
-
-        return decorator
 
     @property
     def html(self) -> HTMLElement:
