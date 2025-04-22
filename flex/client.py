@@ -13,7 +13,7 @@ from .style import CSS
 class App(Starlette):
     def __init__(
         self,
-        title: str = "Pulse",
+        title: str = "Flex",
         *,
         path: str = "/",
         methods: Optional[List[str]] = None,

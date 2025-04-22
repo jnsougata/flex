@@ -1,5 +1,5 @@
 """
-Pulse
+Flex
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 An ASGI web framework for building simple, fast and scalable web applications.
@@ -9,7 +9,7 @@ An ASGI web framework for building simple, fast and scalable web applications.
 
 """
 
-__title__ = "pulse"
+__title__ = "flex"
 __license__ = "MIT"
 __copyright__ = "Copyright 2024-present Sougata Jana"
 __author__ = "Sougata Jana"

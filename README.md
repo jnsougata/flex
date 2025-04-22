@@ -1,4 +1,4 @@
-# Pulse
+# Flex
 
 A fast, minimal ASGI framework for building htmx-powered web apps.
 
