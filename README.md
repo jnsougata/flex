@@ -5,7 +5,7 @@ A fast, minimal ASGI framework for building htmx-powered web apps.
 
 ## Installation
 ```bash
-pip install git+https://github.com/jnsougata/pulse.git
+pip install git+https://github.com/jnsougata/flex.git
 ```
 
 ## Features
