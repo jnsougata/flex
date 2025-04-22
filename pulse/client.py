@@ -23,7 +23,7 @@ class App(Starlette):
         self.head.append(HTMLElement("meta", self_enclosing=True, auto_id=False).set(charset="utf-8"))
         self.head.append(HTMLElement("meta", self_enclosing=True, auto_id=False)
                          .set(name="viewport", content="width=device-width, initial-scale=1.0"))
-        self.head.append(HTMLElement("script", auto_id=False).set(src="https://unpkg.com/htmx.org@1.9.12"))
+        self.head.append(HTMLElement("script", auto_id=False).set(src="https://unpkg.com/htmx.org@2.0.4"))
         self.body = HTMLElement("body", auto_id=False)
         self.add_route(path, lambda _: HTMLResponse(str(self)), methods=methods)
 
@@ -66,7 +66,7 @@ class App(Starlette):
     ) -> Callable[[HTMLElement], HTMLElement]:
         def decorator(child: HTMLElement) -> HTMLElement:
             self.body.append(child)
-            ev = Event(event).path(f"/events/{event.split(" ")[0]}/{child.id}").method(method)
+            ev = Event(event).path(f"/events/{child.id}").method(method)
             if target:
                 ev.target(f"#{target.id}")
             if form:
