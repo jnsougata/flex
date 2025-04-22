@@ -1,4 +1,4 @@
-from typing import List, Optional, Dict, Callable
+from typing import List, Optional, Dict, Callable, Union
 
 from starlette.applications import Starlette
 from starlette.responses import HTMLResponse
@@ -45,22 +45,34 @@ class App(Starlette):
         self.head.append(style)
         return style
 
+    def write(self, *children: Union[HTMLElement, str]) -> HTMLElement:
+        """
+        Write HTML elements to the body of the document.
+        """
+        for child in children:
+            if isinstance(child, HTMLElement):
+                self.body.append(child)
+            else:
+                self.body.append(str(child))
+        return self.body
+
     def event(
         self,
-        method: str = "GET",
-        name: str = "click",
+        name: str,
+        method: Optional[str] = "GET",
         target: Optional[HTMLElement] = None,
         form: Optional[Dict[str, str]] = None,
         **hxattrs: str
     ) -> Callable[[HTMLElement], HTMLElement]:
         def decorator(child: HTMLElement) -> HTMLElement:
+            self.body.append(child)
             ev = Event(name).path(f"/events/{name}/{child.id}").method(method)
             if target:
                 ev.target(f"#{target.id}")
             if form:
                 ev.form(**form)
             child.listener(self, ev, **hxattrs)
-            self.body.append(child)
+            print(f"Event {name} registered for {child.tag} with id {child.id} and method {method} {target.id}")
             return child
         return decorator
 

@@ -1,5 +1,5 @@
 from logging import Handler
-from typing import Any, Union
+from typing import Any, Union, Optional
 
 
 from pulse.style import CSS
@@ -17,6 +17,7 @@ def compose(
         raise TypeError("child must be an instance of HTMLElement")
     def decorator(func: Handler):
         child.handler = func  # noqa
+        child.set(**attrs)
         return child
     return decorator
 

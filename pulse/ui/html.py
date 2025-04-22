@@ -20,7 +20,7 @@ class HTMLElement:
         self.tag = tag
         self.attributes: Dict[str, Any] = {}
         if auto_id:
-            self.id = secrets.token_hex(8)
+            self.id = f"{tag}-{secrets.token_hex(8)}"
             self.attributes["id"] = self.id
         else:
             self.id = None
