@@ -71,5 +71,8 @@ The above code will create the following web app:
 Note: The css is not included in the code snippet. It is linked from `public/style.css` in the code.
 
 ![image](https://github.com/user-attachments/assets/094ff17c-79f7-47fb-bab2-ad6c84a9d3c6)
+
+Find the code for following graph plotting app [here.](/examples/graph.py)
+
 ![plot](https://github.com/user-attachments/assets/b4ca4218-89b2-48ed-94dd-a84b4717f4c1)
 
