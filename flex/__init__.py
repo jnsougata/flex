@@ -16,7 +16,7 @@ __author__ = "Sougata Jana"
 __version__ = "0.0.1a"
 
 
-from pulse.events import Event, EventModifier, Swapping
+from flex.events import Event, EventModifier, Swapping
 
 from . import ui
 from .client import App

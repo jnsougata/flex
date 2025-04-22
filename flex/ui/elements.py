@@ -1,7 +1,7 @@
 from logging import Handler
 from typing import Any, Optional, Union
 
-from pulse.style import CSS
+from flex.style import CSS
 
 from .html import Handler, HTMLElement
 

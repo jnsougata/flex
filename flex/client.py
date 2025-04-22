@@ -4,7 +4,7 @@ from starlette.applications import Starlette
 from starlette.responses import HTMLResponse
 from starlette.staticfiles import StaticFiles
 
-from pulse.ui import HTMLElement
+from flex.ui import HTMLElement
 
 from .events import Event
 from .style import CSS

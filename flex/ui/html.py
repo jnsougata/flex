@@ -4,11 +4,11 @@ from typing import TYPE_CHECKING, Any, Callable, Coroutine, Dict, List, Optional
 from starlette.requests import Request
 from starlette.responses import HTMLResponse
 
-from pulse.events import Event
-from pulse.style import CSS
+from flex.events import Event
+from flex.style import CSS
 
 if TYPE_CHECKING:
-    from pulse.client import App
+    from flex.client import App
 
 
 Handler = Callable[[Request], Coroutine[Any, Any, "HTMLElement"]]

@@ -18,16 +18,14 @@ pip install git+https://github.com/jnsougata/pulse.git
 ## Quick Start
 
 ```python
-import pulse
-from pulse import ui
+import flex
+from flex import ui
 
-
-app = pulse.App()
+app = flex.App()
 app.stylesheet("/public/style.css")
 app.htmx("https://unpkg.com/htmx.org@2.0.4")
 app.static("public", "/public")
 app.counter = 0
-
 
 view = ui.div(
     "Hello, World!",
@@ -40,11 +38,13 @@ view = ui.div(
     css="view"
 )
 
+
 @app.trigger("click", target=view)
 @ui.compose(ui.button("+1", css="increment"))
 async def increment(_):
     app.counter += 1
     return str(app.counter)
+
 
 app.write(
     ui.section(
@@ -61,13 +61,13 @@ app.write(
     )
 )
 
-
 if __name__ == "__main__":
     import uvicorn
 
     uvicorn.run(app)
 ```
 The above code will create the following web app:
+
 Note: The css is not included in the code snippet. It is linked from `public/style.css` in the code.
 
 ![image](https://github.com/user-attachments/assets/094ff17c-79f7-47fb-bab2-ad6c84a9d3c6)
