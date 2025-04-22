@@ -1,12 +1,13 @@
-from typing import List, Optional, Dict, Callable, Union
+from typing import Callable, Dict, List, Optional, Union
 
 from starlette.applications import Starlette
 from starlette.responses import HTMLResponse
+from starlette.staticfiles import StaticFiles
 
 from pulse.ui import HTMLElement
-from .style import CSS
 
 from .events import Event
+from .style import CSS
 
 
 class App(Starlette):
@@ -15,17 +16,28 @@ class App(Starlette):
         title: str = "Pulse",
         *,
         path: str = "/",
-        methods: Optional[List[str]] = None
+        methods: Optional[List[str]] = None,
     ):
         super().__init__()
         self.title = title
         self.head = HTMLElement("head", auto_id=False)
         self.head.append(HTMLElement("title", auto_id=False).append(title))
-        self.head.append(HTMLElement("meta", self_enclosing=True, auto_id=False).set(charset="utf-8"))
-        self.head.append(HTMLElement("meta", self_enclosing=True, auto_id=False)
-                         .set(name="viewport", content="width=device-width, initial-scale=1.0"))
+        self.head.append(
+            HTMLElement("meta", self_enclosing=True, auto_id=False).set(charset="utf-8")
+        )
+        self.head.append(
+            HTMLElement("meta", self_enclosing=True, auto_id=False).set(
+                name="viewport", content="width=device-width, initial-scale=1.0"
+            )
+        )
         self.body = HTMLElement("body", auto_id=False)
         self.add_route(path, lambda _: HTMLResponse(str(self)), methods=methods)
+
+    def static(self, directory: str, route: str) -> None:
+        """
+        Mount a static files app to serve static files.
+        """
+        self.mount(route, StaticFiles(directory=directory), name="static")
 
     def style(self, **styles: str):
         """
@@ -49,7 +61,7 @@ class App(Starlette):
         return script
 
     def stylesheet(self, href: str, **attrs) -> HTMLElement:
-        style = HTMLElement("link").set(rel="stylesheet", href=href)
+        style = HTMLElement("link", auto_id=False).set(rel="stylesheet", href=href)
         style.set(**attrs)
         self.head.append(style)
         return style
@@ -71,10 +83,9 @@ class App(Starlette):
         method: Optional[str] = "GET",
         target: Optional[HTMLElement] = None,
         form: Optional[Dict[str, str]] = None,
-        **hxattrs: str
+        **hxattrs: str,
     ) -> Callable[[HTMLElement], HTMLElement]:
         def decorator(child: HTMLElement) -> HTMLElement:
-            self.body.append(child)
             ev = Event(event).path(f"/ui/events/{child.id}").method(method)
             if target:
                 ev.target(f"#{target.id}")
@@ -82,12 +93,12 @@ class App(Starlette):
                 ev.form(**form)
             child.listener(self, ev, **hxattrs)
             return child
+
         return decorator
 
     @property
     def html(self) -> HTMLElement:
         return HTMLElement("html", auto_id=False).append(self.head).append(self.body)
-
 
     def __str__(self) -> str:
         return f"<!DOCTYPE html>{self.html}"

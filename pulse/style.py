@@ -30,4 +30,6 @@ class CSS:
         return css
 
     def __str__(self) -> str:
-        return "; ".join([f"{key}: {value}" for key, value in self.__dict__["_attrs"].items()])
+        return "; ".join(
+            [f"{key}: {value}" for key, value in self.__dict__["_attrs"].items()]
+        )

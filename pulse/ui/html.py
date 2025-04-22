@@ -1,12 +1,12 @@
-from typing import List, Dict, Any, Union, Callable, Coroutine, TYPE_CHECKING, Optional
+import secrets
+from typing import (TYPE_CHECKING, Any, Callable, Coroutine, Dict, List,
+                    Optional, Union)
 
 from starlette.requests import Request
 from starlette.responses import HTMLResponse
 
 from pulse.events import Event
 from pulse.style import CSS
-
-import secrets
 
 if TYPE_CHECKING:
     from pulse.client import App
@@ -38,14 +38,19 @@ class HTMLElement:
         return self
 
     def __str__(self) -> str:
-        attrs = ' '.join([f'{key}="{value}"' for key, value in self.attributes.items()])
+        attrs = " ".join([f'{key}="{value}"' for key, value in self.attributes.items()])
         if str(self.style):
             attrs += f' style="{self.style}"'
-        children = ''.join([str(child) if isinstance(child, HTMLElement) else child for child in self.children])
+        children = "".join(
+            [
+                str(child) if isinstance(child, HTMLElement) else child
+                for child in self.children
+            ]
+        )
         if self.self_closing:
-            return f'<{self.tag} {attrs} />'
+            return f"<{self.tag} {attrs} />"
         else:
-            return f'<{self.tag} {attrs}>{children}</{self.tag}>'
+            return f"<{self.tag} {attrs}>{children}</{self.tag}>"
 
     # noinspection PyProtectedMember
     def listener(self, app: "App", event: Event, **hxattrs: str):
@@ -57,12 +62,23 @@ class HTMLElement:
         if event._swap:
             hxattrs["swap"] = event._swap
         if event._form_expr:
-            hxattrs["vals"] = ("js:{ "
-                               + ", ".join([f"{key}: {value}" for key, value in event._form_expr.items()]) + " }")
+            hxattrs["vals"] = (
+                "js:{ "
+                + ", ".join(
+                    [f"{key}: {value}" for key, value in event._form_expr.items()]
+                )
+                + " }"
+            )
         self.attributes.update(**{f"hx-{key}": value for key, value in hxattrs.items()})
 
         if self.handler:
+
             async def callback(request: Request):
                 elem = await self.handler(request)
                 return HTMLResponse(str(elem))
-            app.add_route(hxattrs[event._method.lower()], callback, methods=[event._method.upper()])
+
+            app.add_route(
+                hxattrs[event._method.lower()],
+                callback,
+                methods=[event._method.upper()],
+            )

@@ -16,7 +16,8 @@ __author__ = "Sougata Jana"
 __version__ = "0.0.1a"
 
 
-from .client import App
 from pulse.events import Event, EventModifier, Swapping
-from .style import CSS
+
 from . import ui
+from .client import App
+from .style import CSS

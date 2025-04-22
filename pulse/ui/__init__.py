@@ -1,2 +1,2 @@
-from .html import HTMLElement
 from .elements import *
+from .html import HTMLElement
