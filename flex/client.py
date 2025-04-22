@@ -4,10 +4,9 @@ from starlette.applications import Starlette
 from starlette.responses import HTMLResponse
 from starlette.staticfiles import StaticFiles
 
-from .ui import HTMLElement
-
 from .htmx import Event, Swapping
 from .style import CSS
+from .ui import HTMLElement
 
 
 class App(Starlette):

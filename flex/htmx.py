@@ -1,5 +1,5 @@
 from enum import StrEnum
-from typing import Literal, TYPE_CHECKING
+from typing import TYPE_CHECKING, Literal
 
 if TYPE_CHECKING:
     from .ui import HTMLElement
@@ -78,7 +78,7 @@ class Event:
         self.hx_swap = swap
         return self
 
-    def form(self, **expr: str) -> "Event":
+    def js(self, **expr: str) -> "Event":
         self.hx_form.update(expr)
         return self
 
@@ -100,13 +100,14 @@ class Event:
         return self.name
 
 
-from typing import Callable, Optional, Dict
+from typing import Callable, Dict, Optional
 
 
 def click(
     delay: float = 0,
     target: Optional["HTMLElement"] = None,
-    **hxattrs: str
+    expr: Optional[Dict[str, str]] = None,
+    **hxattrs: str,
 ):
     """
     Click event decorator for HTMX events.
@@ -119,6 +120,8 @@ def click(
         ev = Event(event).method("POST").path(child.id)
         if target:
             ev.target(f"#{target.id}")
+        if expr:
+            ev.js(**expr)
         child.load_event(ev, **hxattrs)
         return child
 
@@ -130,7 +133,7 @@ def load_polling(
     *,
     swapping: Swapping = Swapping.innerHTML,
     target: Optional["HTMLElement"] = None,
-    **hxattrs: str
+    **hxattrs: str,
 ):
     """
     Load polling decorator for HTMX events.
@@ -140,7 +143,7 @@ def load_polling(
         ev = Event.load_polling(delay, swapping).method("GET").path(child.id)  # noqa
         if target:
             ev.target(f"#{target.id}")
-        child.load_event(ev)
+        child.load_event(ev, **hxattrs)
         return child
 
     return decorator
@@ -148,8 +151,8 @@ def load_polling(
 
 def change(
     target: Optional["HTMLElement"] = None,
-    form: Optional[Dict[str, str]] = None,
-    **hxattrs: str
+    expr: Optional[Dict[str, str]] = None,
+    **hxattrs: str,
 ) -> Callable[["HTMLElement"], "HTMLElement"]:
     """
     Only issue a request if the value of the element has changed.
@@ -166,8 +169,8 @@ def change(
         ev = Event(event).method("POST").path(child.id)
         if target:
             ev.target(f"#{target.id}")
-        if form:
-            ev.form(**form)
+        if expr:
+            ev.js(**expr)
         child.load_event(ev, **hxattrs)
         return child
 
@@ -178,15 +181,15 @@ def trigger(
     event: str,
     method: Optional[str] = "GET",
     target: Optional["HTMLElement"] = None,
-    form: Optional[Dict[str, str]] = None,
+    expr: Optional[Dict[str, str]] = None,
     **hxattrs: str,
 ) -> Callable[["HTMLElement"], "HTMLElement"]:
     def decorator(child: "HTMLElement") -> "HTMLElement":
         ev = Event(event).path(child.id).method(method)
         if target:
             ev.target(f"#{target.id}")
-        if form:
-            ev.form(**form)
+        if expr:
+            ev.js(**expr)
         child.load_event(ev, **hxattrs)
         return child
 
@@ -198,7 +201,7 @@ def polling(
     *,
     target: Optional["HTMLElement"] = None,
     swapping: Swapping = Swapping.innerHTML,
-    **hxattrs: str
+    **hxattrs: str,
 ) -> Callable[["HTMLElement"], "HTMLElement"]:
     """
     Polling decorator for HTMX events.

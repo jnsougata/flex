@@ -98,6 +98,60 @@ def compose(
     return decorator
 
 
+def row(
+    *children: Union[HTMLElement, str],
+    height: str = "100%",
+    width: str = "100%",
+    align_x: str = "center",
+    align_y: str = "center",
+    shrink: bool = False,
+    wrap: bool = False,
+    overflow: str = "hidden",
+    **styles: str,
+) -> HTMLElement:
+    el = div(
+        width=width,
+        height=height,
+        display="flex",
+        align_items=align_y,
+        justify_content=align_x,
+        flex_shrink="1" if shrink else "0",
+        flex_wrap="wrap" if wrap else "nowrap",
+        overflow=overflow,
+        **styles,
+    )
+    el.set()
+    el.children = list(children)
+    return el
+
+
+def column(
+    *children: Union[HTMLElement, str],
+    height: str = "100%",
+    width: str = "100%",
+    align_x: str = "center",
+    align_y: str = "center",
+    shrink: bool = False,
+    wrap: bool = False,
+    overflow: str = "hidden",
+    **styles: str,
+):
+    el = div(
+        width=width,
+        height=height,
+        display="flex",
+        flex_direction="column",
+        align_items=align_x,
+        justify_content=align_y,
+        flex_shrink="1" if shrink else "0",
+        flex_wrap="wrap" if wrap else "nowrap",
+        overflow=overflow,
+        **styles,
+    )
+    el.children = list(children)
+    return el
+
+
 def main(
     *children: Union[HTMLElement, str], css: Optional[str] = None, **styles
 ) -> HTMLElement:
@@ -233,10 +287,11 @@ def a(*children: Union[HTMLElement, str], href: str = "#", **styles) -> HTMLElem
     return el
 
 
-def img(src: str, **styles) -> HTMLElement:
+def img(src: str, alt: str = "alt", **styles) -> HTMLElement:
     el = HTMLElement("img", self_enclosing=True)
     el.set(src=src)
     el.style = CSS(**styles)
+    el.set(alt=alt)
     return el
 
 
