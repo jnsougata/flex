@@ -39,7 +39,7 @@ class EventModifier:
         return cls(f"from:{selector}")
 
 
-class DOMEvent:
+class Event:
 
     def __init__(self, name: str):
         self.name = name
@@ -50,46 +50,46 @@ class DOMEvent:
         self._form_expr = {}
 
     @classmethod
-    def polling(cls, interval: int) -> "DOMEvent":
+    def polling(cls, interval: int) -> "Event":
         return cls(f"every {interval}ms")
 
     @classmethod
-    def load_polling(cls, interval: int, swap: Swapping) -> "DOMEvent":
+    def load_polling(cls, interval: int, swap: Swapping) -> "Event":
         ev = cls(f"load delay:{interval}ms")
         ev.swap(swap)
         return ev
 
-    def path(self, path: str) -> "DOMEvent":
+    def path(self, path: str) -> "Event":
         self._path = path
         return self
 
-    def method(self, method: str) -> "DOMEvent":
+    def method(self, method: str) -> "Event":
         self._method = method
         return self
 
-    def target(self, target: str) -> "DOMEvent":
+    def target(self, target: str) -> "Event":
         self._target = target
         return self
 
-    def swap(self, swap: Swapping) -> "DOMEvent":
+    def swap(self, swap: Swapping) -> "Event":
         self._swap = swap
         return self
 
-    def form(self, **expr: str) -> "DOMEvent":
+    def form(self, **expr: str) -> "Event":
         self._form_expr.update(expr)
         return self
 
-    def filters(self, *expr: str, logic: Literal["&&", "||"] = "&&") -> "DOMEvent":
+    def filters(self, *expr: str, logic: Literal["&&", "||"] = "&&") -> "Event":
         if logic not in ("&&", "||"):
             raise ValueError("Invalid logic operator")
         self.name += f"[{logic.join(expr)}]"
         return self
 
-    def modifiers(self, *evm: EventModifier) -> "DOMEvent":
+    def modifiers(self, *evm: EventModifier) -> "Event":
         self.name = f"{self.name} {' '.join([m.name for m in evm])}"
         return self
 
-    def merge(self, event: "DOMEvent") -> "DOMEvent":
+    def merge(self, event: "Event") -> "Event":
         self.name += f", {event.name}"
         return self
 

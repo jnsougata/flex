@@ -1,0 +1,73 @@
+from typing import List, Optional, Dict, Callable
+
+from starlette.applications import Starlette
+from starlette.responses import HTMLResponse
+
+from pulse.ui import HTMLElement
+
+from .events import Event
+
+
+class App(Starlette):
+    def __init__(
+        self,
+        title: str = "Pulse",
+        *,
+        path: str = "/",
+        methods: Optional[List[str]] = None
+    ):
+        super().__init__()
+        self.title = title
+        self.head = HTMLElement("head", auto_id=False)
+        self.head.append(HTMLElement("title", auto_id=False).append(title))
+        self.head.append(HTMLElement("meta", self_enclosing=True, auto_id=False).set(charset="utf-8"))
+        self.head.append(HTMLElement("meta", self_enclosing=True, auto_id=False)
+                         .set(name="viewport", content="width=device-width, initial-scale=1.0"))
+        self.head.append(HTMLElement("script", auto_id=False).set(src="https://unpkg.com/htmx.org@1.9.12"))
+        self.body = HTMLElement("body", auto_id=False)
+        self.add_route(path, lambda _: HTMLResponse(str(self)), methods=methods)
+
+    def link(self, rel: str, href: str, **attrs) -> HTMLElement:
+        link = HTMLElement("link").set(rel=rel, href=href)
+        link.set(**attrs)
+        self.head.append(link)
+        return link
+
+    def script(self, src: str, **attrs) -> HTMLElement:
+        script = HTMLElement("script").set(src=src)
+        script.set(**attrs)
+        self.head.append(script)
+        return script
+
+    def style(self, href: str, **attrs) -> HTMLElement:
+        style = HTMLElement("link").set(rel="stylesheet", href=href)
+        style.set(**attrs)
+        self.head.append(style)
+        return style
+
+    def event(
+        self,
+        method: str = "GET",
+        name: str = "click",
+        target: Optional[HTMLElement] = None,
+        form: Optional[Dict[str, str]] = None,
+        **hxattrs: str
+    ) -> Callable[[HTMLElement], HTMLElement]:
+        def decorator(child: HTMLElement) -> HTMLElement:
+            ev = Event(name).path(f"/events/{name}/{child.id}").method(method)
+            if target:
+                ev.target(f"#{target.id}")
+            if form:
+                ev.form(**form)
+            child.listener(self, ev, **hxattrs)
+            self.body.append(child)
+            return child
+        return decorator
+
+    @property
+    def html(self) -> HTMLElement:
+        return HTMLElement("html", auto_id=False).append(self.head).append(self.body)
+
+
+    def __str__(self) -> str:
+        return f"<!DOCTYPE html>{self.html}"

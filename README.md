@@ -32,7 +32,7 @@ import uvicorn
 
 import pulse
 
-dom = pulse.Document()
+dom = pulse.App()
 
 dom.head.append(pulse.HTMLElement("title").append("Pulse!"))
 
@@ -59,16 +59,15 @@ button_style = pulse.CSS(
     cursor="pointer"
 )
 
-
 counter = pulse.HTMLElement("button").append("+1")
 counter.style = button_style
 
 dom.counter = 0
 
 
-@counter.listen(
+@counter.listener(
     dom,
-    pulse.DOMEvent("click")
+    pulse.Event("click")
     .method("GET")
     .path("/clicked-p")
     .target("#container h1")
@@ -93,9 +92,9 @@ name_input.style = pulse.CSS(
 )
 
 
-@name_input.listen(
+@name_input.listener(
     dom,
-    pulse.DOMEvent("input")
+    pulse.Event("input")
     .path("/echo")
     .method("POST")
     .target("#container h1")
@@ -108,7 +107,6 @@ async def echo(request: pulse.Request):
 
 dom.body.append(counter)
 dom.body.append(name_input)
-
 
 if __name__ == "__main__":
     uvicorn.run(dom)
