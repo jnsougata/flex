@@ -68,11 +68,11 @@ if __name__ == "__main__":
 ```
 The above code will create the following web app:
 
-Note: The css is not included in the code snippet. It is linked from `public/style.css` in the code.
+- Note: The css is not included in the code snippet. It is linked from `public/style.css` in the code.
 
 ![image](https://github.com/user-attachments/assets/094ff17c-79f7-47fb-bab2-ad6c84a9d3c6)
 
-Find the code for following graph plotting app [here.](/examples/graph.py)
-
-![plot](https://github.com/user-attachments/assets/b4ca4218-89b2-48ed-94dd-a84b4717f4c1)
+- #### Find the code for following graph plotting app [here.](/examples/graph.py)
+![Screenshot From 2025-04-24 22-52-49](https://github.com/user-attachments/assets/bdea655e-bd77-4398-a285-cd4a97c9ef65)
+![Screenshot From 2025-04-24 22-53-31](https://github.com/user-attachments/assets/498891b4-ff0c-4e2b-bd56-bb99e2e7ebd5)
 
