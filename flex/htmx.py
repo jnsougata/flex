@@ -127,6 +127,24 @@ def click(
 
     return decorator
 
+def submit(
+    target: Optional["HTMLElement"] = None,
+    expr: Optional[Dict[str, str]] = None,
+    **hxattrs: str,
+):
+    """
+    Submit event decorator for HTMX events.
+    """
+
+    def decorator(child: "HTMLElement") -> "HTMLElement":
+        ev = Event("submit").method("POST").path(child.id)
+        if target:
+            ev.target(f"#{target.id}")
+        if expr:
+            ev.js(**expr)
+        child.load_event(ev, **hxattrs)
+        return child
+    return decorator
 
 def load_polling(
     delay: float = 0,

@@ -19,17 +19,15 @@ view = ui.div(
 
 
 @app.register
-@htmx.click(
-    target=view,
-    expr={
-        "x": "document.querySelectorAll('.plot-input')[0].value",
-        "y": "document.querySelectorAll('.plot-input')[1].value",
-    },
-    # It's currently hacky to get the values from the input fields over button click.
-    # use form submission instead.
+@htmx.submit(target=view)
+@ui.compose(
+    ui.form(
+        ui.input(field="x", placeholder="X values (comma separated)"),
+        ui.input(field="y", placeholder="Y values (comma separated)"),
+        ui.input(type="submit", value="Plot", css="submit"),
+    )
 )
-@ui.compose(ui.button("Plot", css="plot-button"))
-async def plot_button(request):
+async def coordinate_form(request):
     form = await request.form()
     x_values = form.get("x")
     y_values = form.get("y")
@@ -41,15 +39,15 @@ async def plot_button(request):
         return ui.p("X and Y values must have the same length.", color="red")
 
     plt.figure(figsize=(10, 6))
-    plt.plot(x_values, y_values, marker="o")
+    plt.plot(x_values, y_values, marker='o')
     plt.title("Plot")
     plt.xlabel("X values")
     plt.ylabel("Y values")
     plt.tight_layout()
     img = BytesIO()
-    plt.savefig(img, format="png")
+    plt.savefig(img, format='png')
     img.seek(0)
-    plot_url = base64.b64encode(img.getvalue()).decode("utf-8")
+    plot_url = base64.b64encode(img.getvalue()).decode('utf-8')
     img.close()
     return ui.img(
         src=f"data:image/png;base64,{plot_url}",
@@ -59,16 +57,7 @@ async def plot_button(request):
         objec_fit="contain",
     )
 
-
-app.render(
-    ui.div(
-        view,
-        ui.input(placeholder="X values (comma separated)", css="plot-input"),
-        ui.input(placeholder="Y values (comma separated)", css="plot-input"),
-        plot_button,  # type: ignore
-        css="app",
-    )
-)
+app.render(ui.div(view, coordinate_form, css="app"))  # type: ignore
 
 
 if __name__ == "__main__":

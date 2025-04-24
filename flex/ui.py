@@ -166,12 +166,18 @@ def main(
 # noinspection PyShadowingBuiltins
 def input(
     *,
+    field: str = "",
+    value: Any = None,
     placeholder: str = "",
     type: str = "text",
     css: Optional[str] = None,
     **styles: Any,
 ) -> HTMLElement:
     el = HTMLElement("input", self_enclosing=True)
+    if field:
+        el.set(name=field)
+    if value:
+        el.set(value=value)
     el.set(type=type)
     el.set(placeholder=placeholder)
     el.style = CSS(**styles)
