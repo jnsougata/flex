@@ -1,60 +1,17 @@
-import secrets
-from typing import Any, Callable, Coroutine, Dict, List, Optional, Union
+from typing import Any, Dict, List, Optional, Union
 
-from starlette.requests import Request
-from starlette.responses import HTMLResponse
-
-from .htmx import Event
 from .style import CSS
-
-Handler = Callable[[Request, ...], Coroutine[Any, Any, "HTMLElement"]]
 
 
 class HTMLElement:
-    def __init__(self, tag: str, self_enclosing: bool = False, auto_id: bool = True):
+    def __init__(self, tag: str, *, id:str = None, self_enclosing: bool = False):
         self.tag = tag
         self.attributes: Dict[str, Any] = {}
-        if auto_id:
-            self.id = f"{tag}-{secrets.token_hex(8)}"
-            self.attributes["id"] = self.id
-        else:
-            self.id = None
+        self.id = id
         self.children: List[Union["HTMLElement", str]] = []
         self.self_closing: bool = self_enclosing
         self.style: CSS = CSS()
-        self.handler: Optional[Handler] = None
-        self.event: Optional[Event] = None
-
-    def load_event(self, event: Event, **hxattrs: str):
-        self.event = event
-        self.attributes["hx-trigger"] = event.name
-        if event.hx_method:
-            hxattrs[event.hx_method.lower()] = event.hx_path
-        if event.hx_target:
-            hxattrs["target"] = event.hx_target
-        if event.hx_swap:
-            hxattrs["swap"] = event.hx_swap
-        if event.hx_form:
-            vals = ", ".join(
-                [f"{key}: {value}" for key, value in event.hx_form.items()]
-            )
-            hxattrs["vals"] = f"js:{{{vals}}}"
-        self.attributes.update(**{f"hx-{key}": value for key, value in hxattrs.items()})
-
-    def route(self):
-        """
-        Create a route for the element.
-        """
-        if not self.handler:
-            raise ValueError("Handler is not set")
-        if not self.event:
-            raise ValueError("Event is not set")
-
-        async def callback(request: Request, *args, **kwargs):
-            elem = await self.handler(request, *args, **kwargs)
-            return HTMLResponse(str(elem))
-
-        return self.event.hx_path, callback, [self.event.hx_method]
+        self.handlers = {}
 
     def append(self, *children: Union["HTMLElement", str]) -> "HTMLElement":
         self.children.extend(children)
@@ -65,6 +22,8 @@ class HTMLElement:
         return self
 
     def __str__(self) -> str:
+        if self.id:
+            self.attributes["id"] = self.id
         attrs = " ".join([f'{key}="{value}"' for key, value in self.attributes.items()])
         if str(self.style):
             attrs += f' style="{self.style}"'
@@ -79,90 +38,6 @@ class HTMLElement:
         else:
             return f"<{self.tag} {attrs}>{children}</{self.tag}>"
 
-
-def compose(
-    child: Union[HTMLElement, str],
-    **attrs: str,
-):
-    """
-    Compose a function that listens to a DOM event and returns an HTML element.
-    """
-    if not isinstance(child, HTMLElement):
-        raise TypeError("child must be an instance of HTMLElement")
-
-    def decorator(func: Handler):
-        child.handler = func  # noqa
-        child.set(**attrs)
-        return child
-
-    return decorator
-
-
-def row(
-    *children: Union[HTMLElement, str],
-    height: str = "100%",
-    width: str = "100%",
-    align_x: str = "center",
-    align_y: str = "center",
-    shrink: bool = False,
-    wrap: bool = False,
-    overflow: str = "hidden",
-    **styles: str,
-) -> HTMLElement:
-    el = div(
-        width=width,
-        height=height,
-        display="flex",
-        align_items=align_y,
-        justify_content=align_x,
-        flex_shrink="1" if shrink else "0",
-        flex_wrap="wrap" if wrap else "nowrap",
-        overflow=overflow,
-        **styles,
-    )
-    el.set()
-    el.children = list(children)
-    return el
-
-
-def column(
-    *children: Union[HTMLElement, str],
-    height: str = "100%",
-    width: str = "100%",
-    align_x: str = "center",
-    align_y: str = "center",
-    shrink: bool = False,
-    wrap: bool = False,
-    overflow: str = "hidden",
-    **styles: str,
-):
-    el = div(
-        width=width,
-        height=height,
-        display="flex",
-        flex_direction="column",
-        align_items=align_x,
-        justify_content=align_y,
-        flex_shrink="1" if shrink else "0",
-        flex_wrap="wrap" if wrap else "nowrap",
-        overflow=overflow,
-        **styles,
-    )
-    el.children = list(children)
-    return el
-
-
-def main(
-    *children: Union[HTMLElement, str], css: Optional[str] = None, **styles
-) -> HTMLElement:
-    el = HTMLElement("main")
-    el.style = CSS(**styles)
-    if css:
-        el.set(**{"class": css})
-    el.children = list(children)
-    return el
-
-
 # noinspection PyShadowingBuiltins
 def input(
     *,
@@ -171,9 +46,10 @@ def input(
     placeholder: str = "",
     type: str = "text",
     css: Optional[str] = None,
+    id: Optional[str] = None,
     **styles: Any,
 ) -> HTMLElement:
-    el = HTMLElement("input", self_enclosing=True)
+    el = HTMLElement("input", self_enclosing=True, id=id)
     if field:
         el.set(name=field)
     if value:

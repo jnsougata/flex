@@ -1,51 +1,43 @@
-from typing import Callable, Dict, List, Optional, Union
+import webview
 
-from starlette.applications import Starlette
-from starlette.responses import HTMLResponse
-from starlette.staticfiles import StaticFiles
-
-from .htmx import Event, Swapping
-from .style import CSS
+from webview import Window
+from .handler import Handler
 from .ui import HTMLElement
 
 
-class App(Starlette):
+class App:
     def __init__(
         self,
         title: str = "Flex",
-        *,
-        path: str = "/",
-        methods: Optional[List[str]] = None,
+        size: tuple[int, int] = (800, 600),
+        resizeable: bool = True,
+
     ):
         super().__init__()
         self.title = title
-        self.head = HTMLElement("head", auto_id=False)
-        self.head.append(HTMLElement("title", auto_id=False).append(title))
+        self.size = size
+        self.resizable = resizeable
+        self.head = HTMLElement("head")
+        self.head.append(HTMLElement("title").append(title))
         self.head.append(
-            HTMLElement("meta", self_enclosing=True, auto_id=False).set(charset="utf-8")
+            HTMLElement("meta", self_enclosing=True).set(charset="utf-8")
         )
         self.head.append(
-            HTMLElement("meta", self_enclosing=True, auto_id=False).set(
+            HTMLElement("meta", self_enclosing=True).set(
                 name="viewport", content="width=device-width, initial-scale=1.0"
             )
         )
-        self.body = HTMLElement("body", auto_id=False)
-        self.add_route(path, lambda _: HTMLResponse(str(self)), methods=methods)
+        self.body = HTMLElement("body")
+        self.handlers = {}
 
-    def static(self, directory: str, route: str) -> None:
-        """
-        Mount a static files app to serve static files.
-        """
-        self.mount(route, StaticFiles(directory=directory), name="static")
-
-    def style(self, **styles: str):
+    def stylesheet(self, path: str):
         """
         Add CSS styles to the document.
         """
-        self.body.style = CSS(**styles)
-
-    def htmx(self, src: str = "https://unpkg.com/htmx.org@2.0.4"):
-        self.head.append(HTMLElement("script", auto_id=False).set(src=src))
+        # read the file content
+        with open(path, "r") as f:
+            style = HTMLElement("style").append(f.read())
+            self.head.append(style)
 
     def link(self, rel: str, href: str, **attrs) -> HTMLElement:
         link = HTMLElement("link").set(rel=rel, href=href)
@@ -59,34 +51,32 @@ class App(Starlette):
         self.head.append(script)
         return script
 
-    def stylesheet(self, href: str, **attrs) -> HTMLElement:
-        style = HTMLElement("link", auto_id=False).set(rel="stylesheet", href=href)
-        style.set(**attrs)
-        self.head.append(style)
-        return style
-
-    def register(self, elem: HTMLElement):
-        """
-        Load an HTML element into the body of the document.
-        """
-        path, callback, methods = elem.route()
-        self.add_route(path, callback, methods=methods)
-        return elem
-
-    def render(self, *children: Union[HTMLElement, str]) -> HTMLElement:
-        """
-        Write HTML elements to the body of the document.
-        """
-        for child in children:
-            if isinstance(child, HTMLElement):
-                self.body.append(child)
-            else:
-                self.body.append(str(child))
-        return self.body
+    def get_element(self, selector: str) -> Handler:
+        handler = Handler(selector)
+        self.handlers[selector] = handler
+        return handler
 
     @property
     def html(self) -> HTMLElement:
-        return HTMLElement("html", auto_id=False).append(self.head).append(self.body)
+        return HTMLElement("html").append(self.head).append(self.body)
 
     def __str__(self) -> str:
         return f"<!DOCTYPE html>{self.html}"
+
+    def bind(self, window: Window):
+        for selector, handler in self.handlers.items():
+            element = window.dom.get_element(selector)
+            for event, func in handler.events.items():
+                js_event = element.events.__dict__[event]
+                js_event += lambda e: func(window, e)
+
+    def run(self):
+        window = webview.create_window(
+            self.title,
+            html=str(self),
+            resizable=self.resizable,
+            width=self.size[0],
+            height=self.size[1],
+            min_size=(self.size[0], self.size[1]),
+        )
+        webview.start(self.bind, window)

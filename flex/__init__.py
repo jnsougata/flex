@@ -16,6 +16,6 @@ __author__ = "Sougata Jana"
 __version__ = "0.0.1a"
 
 
-from . import htmx, ui
+from . import ui
 from .client import App
 from .style import CSS
