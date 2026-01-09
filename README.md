@@ -4,8 +4,6 @@
 
 No Chromium. No Node.js. Just Python + web UI.
 
----
-
 ## Why Flex?
 
 - Native system webview (small, fast binaries)
@@ -14,15 +12,11 @@ No Chromium. No Node.js. Just Python + web UI.
 - Familiar HTML/CSS for UI
 - No heavy abstractions
 
----
-
 ## Install
 
 ```bash
-pip install flex
+pip install git+https://github.com/jnsougata/flex
 ````
-
----
 
 ## Minimal Example
 
@@ -30,7 +24,7 @@ pip install flex
 import flex
 from webview import Event, Window
 
-app = flex.App("index.html", title="Snake Game Demo", stylesheet="style.css")
+app = flex.App("index.html", title="Chat App", stylesheet="style.css")
 
 @app.listen("loaded")
 def on_loaded():
@@ -41,24 +35,11 @@ if __name__ == "__main__":
     app.run()
 ```
 
----
-
 ## How It Works
 
 ```text
 Python backend → Flex → System WebView → HTML/CSS/JS
 ```
-
----
-
-## What It’s For
-
-* Desktop tools & utilities
-* Internal dashboards
-* Research / scientific apps
-* Lightweight cross-platform GUIs
-
----
 
 ## What It’s Not
 
@@ -66,15 +47,12 @@ Python backend → Flex → System WebView → HTML/CSS/JS
 * A frontend framework
 * A magic layer that hides the webview
 
----
-
 ## Status
 
 Early-stage and evolving. The surface area is intentionally small.
 
----
+## Demo App Window
 
-## License
+<img width="912" height="712" alt="Screenshot 2026-01-10 at 12 43 00 AM" src="https://github.com/user-attachments/assets/984e4b16-d568-45f0-902c-d2d3a0374f1d" />
 
-MIT
 
