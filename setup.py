@@ -39,7 +39,7 @@ if version.endswith(("a", "b", "rc")):
 setup(
     name="flex",
     version=version,
-    description="A fast, minimal ASGI framework for building htmx-powered web apps.",
+    description="Lightweight Python framework for building desktop apps with HTML/CSS using the system webview.",
     url="https://github.com/jnsougata/flex",
     author="Sougata Jana",
     author_email="jnsougata@gmail.com",
