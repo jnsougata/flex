@@ -10,7 +10,7 @@ from .dom import DOMElement
 class App:
     def __init__(
         self,
-        path: str,
+        path: str = "index.html",
         *,
         title: str = "Flex",
         stylesheet: str = None,
