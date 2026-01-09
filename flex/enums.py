@@ -1,0 +1,22 @@
+from enum import Enum
+
+class JSEvent(str, Enum):
+    CLICK = "click"
+    DBLCLICK = "dblclick"
+    MOUSEENTER = "mouseenter"
+    MOUSELEAVE = "mouseleave"
+    MOUSEDOWN = "mousedown"
+    MOUSEUP = "mouseup"
+    MOUSEMOVE = "mousemove"
+    KEYDOWN = "keydown"
+    KEYUP = "keyup"
+    KEYPRESS = "keypress"
+    INPUT = "input"
+    CHANGE = "change"
+    SUBMIT = "submit"
+    FOCUS = "focus"
+    BLUR = "blur"
+    LOAD = "load"
+    UNLOAD = "unload"
+    SCROLL = "scroll"
+    RESIZE = "resize"

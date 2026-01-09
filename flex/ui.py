@@ -85,9 +85,10 @@ def button(
 
 
 def div(
+    id: Optional[str] = None,
     *children: Union[HTMLElement, str], css: Optional[str] = None, **styles
 ) -> HTMLElement:
-    el = HTMLElement("div")
+    el = HTMLElement("div", id=id)
     el.style = CSS(**styles)
     if css:
         el.set(**{"class": css})

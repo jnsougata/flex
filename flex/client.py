@@ -28,7 +28,14 @@ class App:
             )
         )
         self.body = HTMLElement("body")
-        self.handlers = {}
+        self.window = webview.create_window(
+            self.title,
+            resizable=self.resizable,
+            width=self.size[0],
+            height=self.size[1],
+            min_size=(self.size[0], self.size[1]),
+        )
+        self.global_handler_map = {}
 
     def stylesheet(self, path: str):
         """
@@ -53,7 +60,7 @@ class App:
 
     def get_element(self, selector: str) -> Handler:
         handler = Handler(selector)
-        self.handlers[selector] = handler
+        self.global_handler_map[selector] = handler
         return handler
 
     @property
@@ -63,20 +70,13 @@ class App:
     def __str__(self) -> str:
         return f"<!DOCTYPE html>{self.html}"
 
-    def bind(self, window: Window):
-        for selector, handler in self.handlers.items():
-            element = window.dom.get_element(selector)
+    def _bind(self, window: Window):
+        for selector, handler in self.global_handler_map.items():
+            handler.this = self.window.dom.get_element(selector)
             for event, func in handler.events.items():
-                js_event = element.events.__dict__[event]
+                js_event = handler.this.events.__dict__[event.lower()]
                 js_event += lambda e: func(window, e)
 
     def run(self):
-        window = webview.create_window(
-            self.title,
-            html=str(self),
-            resizable=self.resizable,
-            width=self.size[0],
-            height=self.size[1],
-            min_size=(self.size[0], self.size[1]),
-        )
-        webview.start(self.bind, window)
+        self.window.html = str(self)
+        webview.start(self._bind, self.window)

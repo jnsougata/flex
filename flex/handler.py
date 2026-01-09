@@ -6,6 +6,7 @@ class Handler:
     def __init__(self, selector: str):
         self.selector = selector
         self.events = {}
+        self.this = None
 
     def on(self, event: Literal[
         "CLICK",
